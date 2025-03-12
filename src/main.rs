@@ -1,15 +1,12 @@
-use ready_set_boole::adder::adder;
+use ready_set_boole::adder::run_adder;
+use ready_set_boole::multiplier::run_multiplier;
 
-fn run_adder() {
-    let a: u32 = 2;
-    let b: u32 = 3;
-    let sum: u32 = adder(a, b);
 
-    assert_eq!(sum, 5, "Adder function did not return the expected result!");
 
-    println!("{} + {} = {}", a, b, sum);
-}
 
+
+// Runs simple tests for each exercise, you can run 'cargo test' for a few more tests
 fn main() {
     run_adder();
+    run_multiplier();
 }
