@@ -10,12 +10,25 @@
  * and it'd give us 0 when the bits are the same. (0 + 0 = 0, 1 + 1 = 0)
  *
  * Lastly, we shift the carry over to the left by 1, since we're carrying over to the next bit.
+ *
+ * AND truth table:
+ * 0 0 = 0
+ * 0 1 = 0
+ * 1 0 = 0
+ * 1 1 = 1
+ *
+ * XOR truth table:
+ * 0 0 = 0
+ * 0 1 = 1
+ * 1 0 = 1
+ * 1 1 = 0
  */
 pub fn adder(a: u32, b: u32) -> u32 {
     let mut x: u32 = a;
     let mut y: u32 = b;
-    while y != 0 {
-        let carry: u32 = x & y;
+    let mut carry: u32 = 1;
+    while carry != 0 {
+        carry = x & y;
         x = x ^ y;
         y = carry << 1;
     }
