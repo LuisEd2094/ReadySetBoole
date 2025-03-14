@@ -29,6 +29,7 @@ pub fn grey_code(n: u32) -> u32 {
 }
 
 pub fn run_grey_code() {
+    println!("\nRunning grey code function\n");
     let n: u32 = 15;
     let grey: u32 = grey_code(n);
 
@@ -46,7 +47,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_add() {
+    fn test_grey_code() {
         assert_eq!(grey_code(1), 1);
         assert_eq!(grey_code(2), 3);
         assert_eq!(grey_code(3), 2);

@@ -14,11 +14,15 @@ pub fn multiplier(a: u32, b: u32) -> u32 {
 }
 
 pub fn run_multiplier() {
+    println!("\nRunning multiplier function\n");
     let a: u32 = 2;
     let b: u32 = 3;
     let product: u32 = multiplier(a, b);
 
-    assert_eq!(product, 6, "Multiplier function did not return the expected result!");
+    assert_eq!(
+        product, 6,
+        "Multiplier function did not return the expected result!"
+    );
 
     println!("{} * {} = {}", a, b, product);
 }
