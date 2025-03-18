@@ -86,8 +86,8 @@ pub fn run_truth_table() {
 
     let mut boolean_operations: BooleanOperations = BooleanOperations::new();
 
-    let expression = "AB&C|";
-    //let expression = "AB&C&D|E^F>G^H=I^J^K^L|A&M^N|O^P>Q^R=S^T^U^V&W^X|Y^Z|";
+    //let expression = "AB&C|";
+    let expression = "AB&CD&EF&GH&IJ&KL&MN&OP&QR&ST&UV&&&&&&&&&&&";
     match generate_truth_table(expression, &mut boolean_operations) {
         Ok(table) => print_truth_table(&table),
         Err(err) => eprintln!("{}", err),

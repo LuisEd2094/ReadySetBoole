@@ -9,12 +9,14 @@ enum ExprNode {
 pub struct BooleanOperations {
     operations: HashMap<char, fn(bool, bool) -> bool>,
     unary_operations: HashMap<char, fn(bool) -> bool>,
+    cache: HashMap<String, bool>,
 }
 
 impl BooleanOperations {
     pub fn new() -> Self {
         let mut operations: HashMap<char, fn(bool, bool) -> bool> = HashMap::new();
         let mut unary_operations: HashMap<char, fn(bool) -> bool> = HashMap::new();
+        let cache: HashMap<String, bool> = HashMap::new();
 
         operations.insert('>', Self::implication);
         operations.insert('|', Self::disjunction);
@@ -26,6 +28,7 @@ impl BooleanOperations {
         Self {
             operations,
             unary_operations,
+            cache,
         }
     }
 
@@ -108,9 +111,14 @@ impl BooleanOperations {
             Err("Error: Malformed expression".to_string())
         }
     }
+    fn evaluate_tree(&mut self, node: &ExprNode) -> bool {
+        let key = self.generate_cache_key(node);
 
-    fn evaluate_tree(&self, node: &ExprNode) -> bool {
-        match node {
+        // If result is cached, return it
+        if let Some(&cached_result) = self.cache.get(&key) {
+            return cached_result;
+        }
+        let result = match node {
             ExprNode::Const(value) => *value,
             ExprNode::UnaryOp(op, expr) => {
                 let func: &fn(bool) -> bool = self.unary_operations.get(op).unwrap();
@@ -120,6 +128,20 @@ impl BooleanOperations {
                 let func: &fn(bool, bool) -> bool = self.operations.get(op).unwrap();
                 func(self.evaluate_tree(left), self.evaluate_tree(right))
             }
+        };
+        self.cache.insert(key, result);
+        result
+    }
+    fn generate_cache_key(&self, node: &ExprNode) -> String {
+        match node {
+            ExprNode::Const(b) => b.to_string(),
+            ExprNode::UnaryOp(op, expr) => format!("{}{}", op, self.generate_cache_key(expr)),
+            ExprNode::BinaryOp(op, left, right) => format!(
+                "({} {} {})",
+                self.generate_cache_key(left),
+                op,
+                self.generate_cache_key(right)
+            ),
         }
     }
     pub fn evaluate(&mut self, expression: &str) -> Result<bool, String> {
@@ -133,7 +155,17 @@ pub fn run_boolean_operations() {
     let mut boolean_ops = BooleanOperations::new();
 
     // Test expressions
-    let expressions = vec!["10&!", "11|", "10>", "01=", "10&&", "21&", "!", ""];
+    let expressions = vec![
+        "10&!",
+        "11|",
+        "10>",
+        "01=",
+        "10&&",
+        "21&",
+        "!",
+        "",
+        "10&00&00&&&",
+    ];
 
     for expr in expressions {
         match boolean_ops.evaluate(expr) {
@@ -202,7 +234,12 @@ mod tests {
         assert_eq!(boolean_operations.evaluate("1!").unwrap(), false);
         assert_eq!(boolean_operations.evaluate("11=").unwrap(), true);
         assert_eq!(boolean_operations.evaluate("01^").unwrap(), true);
-
+        assert_eq!(
+            boolean_operations
+                .evaluate("10&!10&!10&!10&!10&!====")
+                .unwrap(),
+            true
+        );
         assert!(boolean_operations.evaluate("1&").is_err());
         assert!(boolean_operations.evaluate("!").is_err());
         assert!(boolean_operations.evaluate("1@").is_err());
