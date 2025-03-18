@@ -6,7 +6,7 @@ pub struct BooleanOperations {
 }
 
 impl BooleanOperations {
-    fn new() -> Self {
+    pub fn new() -> Self {
         let mut operations: HashMap<char, fn(bool, bool) -> bool> = HashMap::new();
         let mut unary_operations: HashMap<char, fn(bool) -> bool> = HashMap::new();
 
@@ -76,8 +76,7 @@ impl BooleanOperations {
                     stack.push(result);
                 } else {
                     return Err(format!(
-                        "Error: Not enough operands for unary operator '{}'",
-                        c
+                        "Error: Not enough operands for unary operator '{}'", c
                     ));
                 }
             } else if self.operations.contains_key(&c) {
@@ -86,8 +85,7 @@ impl BooleanOperations {
                     stack.push(result);
                 } else {
                     return Err(format!(
-                        "Error: Not enough operands for binary operator '{}'",
-                        c
+                        "Error: Not enough operands for binary operator '{}'", c
                     ));
                 }
             } else if c == '0' || c == '1' {
