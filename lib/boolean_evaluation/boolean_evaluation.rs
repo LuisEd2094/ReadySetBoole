@@ -1,5 +1,11 @@
 use std::collections::HashMap;
 
+#[derive(Debug, Clone)]
+enum ExprNode {
+    Const(bool),
+    UnaryOp(char, Box<ExprNode>),
+    BinaryOp(char, Box<ExprNode>, Box<ExprNode>),
+}
 pub struct BooleanOperations {
     operations: HashMap<char, fn(bool, bool) -> bool>,
     unary_operations: HashMap<char, fn(bool) -> bool>,
@@ -66,45 +72,59 @@ impl BooleanOperations {
     fn logical_equivalence(a: bool, b: bool) -> bool {
         a == b
     }
-    pub fn evaluate(&mut self, expression: &str) -> Result<bool, String> {
-        let mut stack: Vec<bool> = vec![];
+
+    fn build_tree(&self, expression: &str) -> Result<ExprNode, String> {
+        let mut stack: Vec<ExprNode> = Vec::new();
 
         for c in expression.chars() {
-            if self.unary_operations.contains_key(&c) {
-                if let Some(a) = stack.pop() {
-                    let result = self.unary_operations.get(&c).unwrap()(a);
-                    stack.push(result);
+            if c == '0' || c == '1' {
+                stack.push(ExprNode::Const(c == '1'));
+            } else if let Some(_) = self.unary_operations.get(&c) {
+                if let Some(expr) = stack.pop() {
+                    stack.push(ExprNode::UnaryOp(c, Box::new(expr)));
                 } else {
                     return Err(format!(
-                        "Error: Not enough operands for unary operator '{}'", c
+                        "Error: Not enough operands for unary operator '{}'",
+                        c
                     ));
                 }
-            } else if self.operations.contains_key(&c) {
-                if let (Some(b), Some(a)) = (stack.pop(), stack.pop()) {
-                    let result = self.operations.get(&c).unwrap()(a, b);
-                    stack.push(result);
+            } else if let Some(_) = self.operations.get(&c) {
+                if let (Some(right), Some(left)) = (stack.pop(), stack.pop()) {
+                    stack.push(ExprNode::BinaryOp(c, Box::new(left), Box::new(right)));
                 } else {
                     return Err(format!(
-                        "Error: Not enough operands for binary operator '{}'", c
+                        "Error: Not enough operands for binary operator '{}'",
+                        c
                     ));
                 }
-            } else if c == '0' || c == '1' {
-                stack.push(c == '1');
             } else {
                 return Err(format!("Error: Invalid character '{}'", c));
             }
         }
 
-        // Final result
-        if let Some(result) = stack.pop() {
-            if stack.is_empty() {
-                Ok(result)
-            } else {
-                Err("Error: Extra operands left in stack".to_string())
-            }
+        if stack.len() == 1 {
+            Ok(stack.pop().unwrap())
         } else {
-            Err("Error: Empty expression".to_string())
+            Err("Error: Malformed expression".to_string())
         }
+    }
+
+    fn evaluate_tree(&self, node: &ExprNode) -> bool {
+        match node {
+            ExprNode::Const(value) => *value,
+            ExprNode::UnaryOp(op, expr) => {
+                let func: &fn(bool) -> bool = self.unary_operations.get(op).unwrap();
+                func(self.evaluate_tree(expr))
+            }
+            ExprNode::BinaryOp(op, left, right) => {
+                let func: &fn(bool, bool) -> bool = self.operations.get(op).unwrap();
+                func(self.evaluate_tree(left), self.evaluate_tree(right))
+            }
+        }
+    }
+    pub fn evaluate(&mut self, expression: &str) -> Result<bool, String> {
+        let tree: ExprNode = self.build_tree(expression)?;
+        Ok(self.evaluate_tree(&tree))
     }
 }
 
