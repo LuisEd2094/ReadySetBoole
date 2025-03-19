@@ -36,7 +36,7 @@ pub fn adder(a: u32, b: u32) -> u32 {
 }
 
 pub fn run_adder() {
-    println!("\nRunning adder function\n");
+    println!("\n\tRunning adder function\n");
     let a: u32 = 2;
     let b: u32 = 3;
     let sum: u32 = adder(a, b);

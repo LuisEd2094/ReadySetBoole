@@ -82,12 +82,12 @@ pub fn generate_truth_table(
 }
 
 pub fn run_truth_table() {
-    println!("\nRunning truth table function\n");
+    println!("\n\tRunning truth table function\n");
 
     let mut boolean_operations: BooleanOperations = BooleanOperations::new();
 
-    //let expression = "AB&C|";
-    let expression = "AB&CD&EF&GH&IJ&KL&MN&OP&QR&ST&UV&&&&&&&&&&&";
+    let expression = "AB&C|";
+    //let expression = "AB&CD&EF&GH&IJ&KL&MN&OP&QR&ST&UV&&&&&&&&&&&";
     match generate_truth_table(expression, &mut boolean_operations) {
         Ok(table) => print_truth_table(&table),
         Err(err) => eprintln!("{}", err),

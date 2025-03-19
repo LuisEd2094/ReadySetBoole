@@ -14,7 +14,7 @@ pub fn multiplier(a: u32, b: u32) -> u32 {
 }
 
 pub fn run_multiplier() {
-    println!("\nRunning multiplier function\n");
+    println!("\n\tRunning multiplier function\n");
     let a: u32 = 2;
     let b: u32 = 3;
     let product: u32 = multiplier(a, b);

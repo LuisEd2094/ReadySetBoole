@@ -1,8 +1,9 @@
 use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
-enum ExprNode {
+pub enum ExprNode {
     Const(bool),
+    Var(char),
     UnaryOp(char, Box<ExprNode>),
     BinaryOp(char, Box<ExprNode>, Box<ExprNode>),
 }
@@ -76,11 +77,19 @@ impl BooleanOperations {
         a == b
     }
 
-    fn build_tree(&self, expression: &str) -> Result<ExprNode, String> {
+    /**
+     * We can use this function to get a tree representation of the expression
+     * If the expression contains variables, we can pass var=true to build the tree
+     * with the variables as nodes
+     * Otherwise, it'd build the tree with 0 and 1 as nodes, expecting to solve it in the future
+     */
+    pub fn build_tree(&self, expression: &str, var: Option<bool>) -> Result<ExprNode, String> {
         let mut stack: Vec<ExprNode> = Vec::new();
-
+        let var = var.unwrap_or(false);
         for c in expression.chars() {
-            if c == '0' || c == '1' {
+            if var && c.is_ascii_uppercase() {
+                stack.push(ExprNode::Var(c));
+            } else if c == '0' || c == '1' {
                 stack.push(ExprNode::Const(c == '1'));
             } else if let Some(_) = self.unary_operations.get(&c) {
                 if let Some(expr) = stack.pop() {
@@ -120,6 +129,7 @@ impl BooleanOperations {
         }
         let result = match node {
             ExprNode::Const(value) => *value,
+            ExprNode::Var(value) => panic!("Can't solve tree with value {}", value),
             ExprNode::UnaryOp(op, expr) => {
                 let func: &fn(bool) -> bool = self.unary_operations.get(op).unwrap();
                 func(self.evaluate_tree(expr))
@@ -135,6 +145,7 @@ impl BooleanOperations {
     fn generate_cache_key(&self, node: &ExprNode) -> String {
         match node {
             ExprNode::Const(b) => b.to_string(),
+            ExprNode::Var(value) => panic!("Can't solve tree with value {}", value),
             ExprNode::UnaryOp(op, expr) => format!("{}{}", op, self.generate_cache_key(expr)),
             ExprNode::BinaryOp(op, left, right) => format!(
                 "({} {} {})",
@@ -144,14 +155,18 @@ impl BooleanOperations {
             ),
         }
     }
+
+    /**
+     * When we evaluate we expect a string with only 0/1 and operators
+     */
     pub fn evaluate(&mut self, expression: &str) -> Result<bool, String> {
-        let tree: ExprNode = self.build_tree(expression)?;
+        let tree: ExprNode = self.build_tree(expression, None)?;
         Ok(self.evaluate_tree(&tree))
     }
 }
 
 pub fn run_boolean_operations() {
-    println!("\nRunning boolean operations function\n");
+    println!("\n\tRunning boolean operations function\n");
     let mut boolean_ops = BooleanOperations::new();
 
     // Test expressions
