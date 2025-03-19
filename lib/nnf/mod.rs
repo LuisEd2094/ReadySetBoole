@@ -1,3 +1,3 @@
 pub mod nnf;
 
-pub use nnf::{negation_normal_form, run_negation_normal_form};
+pub use nnf::run_negation_normal_form;

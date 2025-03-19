@@ -1,16 +1,17 @@
 use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
+pub struct BooleanOperations {
+    operations: HashMap<char, fn(bool, bool) -> bool>,
+    unary_operations: HashMap<char, fn(bool) -> bool>,
+    cache: HashMap<String, bool>,
+}
+#[derive(Debug, Clone)]
 pub enum ExprNode {
     Const(bool),
     Var(char),
     UnaryOp(char, Box<ExprNode>),
     BinaryOp(char, Box<ExprNode>, Box<ExprNode>),
-}
-pub struct BooleanOperations {
-    operations: HashMap<char, fn(bool, bool) -> bool>,
-    unary_operations: HashMap<char, fn(bool) -> bool>,
-    cache: HashMap<String, bool>,
 }
 
 impl BooleanOperations {
