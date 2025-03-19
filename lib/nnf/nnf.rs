@@ -117,5 +117,12 @@ mod tests {
         assert_eq!(negation_normal_form("AB>"), "A!B|");
         assert_eq!(negation_normal_form("AB="), "A!B|B!A|&");
         assert_eq!(negation_normal_form("AB|C&!"), "A!B!&C!|");
+
+        // No transformation needed
+        assert_eq!(negation_normal_form("A!B!&C!|"), "A!B!&C!|");
+        assert_eq!(negation_normal_form("A!B!|"), "A!B!|");
+        assert_eq!(negation_normal_form("A!B!&"), "A!B!&");
+        assert_eq!(negation_normal_form("A!B|"), "A!B|");
+        assert_eq!(negation_normal_form("A!B|B!A|&"), "A!B|B!A|&");
     }
 }
