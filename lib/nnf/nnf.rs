@@ -3,7 +3,8 @@ use crate::boolean_evaluation::{BooleanOperations, ExprNode};
 pub fn negation_normal_form(formula: &str) -> String {
     let operations = BooleanOperations::new();
 
-    let tree = operations.build_tree(formula, Some(true))
+    let tree = operations
+        .build_tree(formula, Some(true))
         .expect("Failed to build tree");
 
     // Convert the tree to NNF
@@ -98,7 +99,6 @@ fn to_rpn(node: &ExprNode) -> String {
     }
 }
 
-
 pub fn run_negation_normal_form() {
     println!("\n\tRunning negation normal form function\n");
     let formula = "AB&!";
@@ -106,8 +106,6 @@ pub fn run_negation_normal_form() {
     let nnf = negation_normal_form(formula);
     println!("Negation Normal Form: {}", nnf);
 }
-
-
 
 #[cfg(test)]
 mod tests {
