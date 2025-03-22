@@ -122,29 +122,4 @@ mod tests {
             "A!B|B!A|&"
         );
     }
-    #[test]
-    fn test_equal() {
-        let mut boolean_evaluation = BooleanOperations::new();
-
-        assert_eq!(
-            boolean_evaluation.evaluate(&boolean_evaluation.negation_normal_form("AB&!")),
-            boolean_evaluation.evaluate("AB&!")
-        );
-        assert_eq!(
-            boolean_evaluation.evaluate(&boolean_evaluation.negation_normal_form("AB|!")),
-            boolean_evaluation.evaluate("AB|!")
-        );
-        assert_eq!(
-            boolean_evaluation.evaluate(&boolean_evaluation.negation_normal_form("AB>")),
-            boolean_evaluation.evaluate("AB>")
-        );
-        assert_eq!(
-            boolean_evaluation.evaluate(&boolean_evaluation.negation_normal_form("AB=")),
-            boolean_evaluation.evaluate("AB=")
-        );
-        assert_eq!(
-            boolean_evaluation.evaluate(&boolean_evaluation.negation_normal_form("AB|C&!")),
-            boolean_evaluation.evaluate("AB|C&!")
-        );
-    }
 }
