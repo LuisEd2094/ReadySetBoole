@@ -1,4 +1,4 @@
-use crate::boolean_evaluation::BooleanOperations;
+use crate::boolean_operations::BooleanOperations;
 use std::collections::HashSet;
 
 pub struct TruthTable {
