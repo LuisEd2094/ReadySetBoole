@@ -96,6 +96,8 @@ pub fn run_negation_normal_form() {
 
 #[cfg(test)]
 mod tests {
+    use crate::truth_table::generate_truth_table;
+
     use super::*;
     #[test]
     fn test_transformation() {
@@ -121,5 +123,13 @@ mod tests {
             boolean_evaluation.negation_normal_form("A!B|B!A|&"),
             "A!B|B!A|&"
         );
+    }
+    #[test]
+    fn test_truth_table() {
+        let mut evaluator = BooleanOperations::new();
+        let formula = "AB&!";
+        let nnf = evaluator.negation_normal_form(formula);
+        assert_eq!(generate_truth_table(formula, &mut evaluator).unwrap(), generate_truth_table(&nnf, &mut evaluator).unwrap());
+
     }
 }

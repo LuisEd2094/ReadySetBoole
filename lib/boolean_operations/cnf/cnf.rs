@@ -236,7 +236,7 @@ mod tests {
         );
     }
     #[test]
-    fn test_truth_table() {
+    fn test_second_method_with_truth_table() {
         let mut boolean_evaluation: BooleanOperations = BooleanOperations::new();
 
         /*
@@ -289,5 +289,12 @@ mod tests {
             boolean_evaluation.conjunctive_normal_form("AB|!C!&", Some(true)),
             "ABC!||AB!C||AB!C!||A!BC||A!BC!||A!B!C||A!B!C!||&&&&&&"
         );
+    }
+    #[test]
+    fn test_result_truth_table() {
+        let mut evaluator = BooleanOperations::new();
+        let formula = "AB|!C!&";
+        let cnf = evaluator.conjunctive_normal_form(formula, Some(true));
+        assert_eq!(generate_truth_table(formula, &mut evaluator).unwrap(), generate_truth_table(&cnf, &mut evaluator).unwrap());
     }
 }

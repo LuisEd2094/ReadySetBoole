@@ -1,6 +1,7 @@
 use crate::boolean_operations::BooleanOperations;
 use std::collections::HashSet;
 
+#[derive(PartialEq, Debug)]
 pub struct TruthTable {
     pub variables: Vec<char>,
     pub rows: Vec<(Vec<bool>, bool)>,
