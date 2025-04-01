@@ -1,6 +1,9 @@
 # ReadySetBoole
 Ready Set Boole, Boolean linear algebra - 42
 
+Sum of Products (SOP) - DNF form (OR of ANDs)
+
+Product of Sums (POS) - CNF form (AND of ORs)
 
 # Links 
 

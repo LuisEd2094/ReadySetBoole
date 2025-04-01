@@ -5,6 +5,7 @@ use ready_set_boole::multiplier::run_multiplier;
 use ready_set_boole::boolean_operations::nnf::run_negation_normal_form;
 use ready_set_boole::boolean_operations::cnf::run_conjunctive_normal_form;
 use ready_set_boole::truth_table::run_truth_table;
+use ready_set_boole::boolean_operations::sat::run_sat_truth_table;
 
 // Runs simple tests for each exercise, you can run 'cargo test' for a few more tests
 fn main() {
@@ -15,4 +16,5 @@ fn main() {
     run_truth_table();
     run_negation_normal_form();
     run_conjunctive_normal_form();
+    run_sat_truth_table();
 }

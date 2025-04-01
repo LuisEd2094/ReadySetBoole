@@ -1,6 +1,7 @@
 pub mod boolean_evaluation;
 pub mod cnf;
 pub mod nnf;
+pub mod sat;
 
 pub use boolean_evaluation::{BooleanOperations, run_boolean_operations, ExprNode};
 pub use nnf::run_negation_normal_form;
