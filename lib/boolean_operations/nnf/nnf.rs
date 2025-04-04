@@ -1,9 +1,16 @@
-use crate::boolean_operations::{BooleanOperations, ExprNode};
+use crate::aux::check_only_vars;
+use crate::aux::expresion_eval::LogicValue;
+use crate::aux::expresion_eval::{ExprNode, ExpressionEvaluator};
+use crate::aux::traits::Algebra;
+use crate::boolean_operations::BooleanOperations;
 
-impl BooleanOperations {
+impl<T, O: Algebra<T>> ExpressionEvaluator<T, O>
+where
+    T: From<LogicValue> + std::fmt::Display + Clone,
+{
     pub fn negation_normal_form(&self, formula: &str) -> String {
         let tree = self
-            .build_tree(formula, Some(true))
+            .build_tree(formula, check_only_vars(formula))
             .expect("Failed to build tree");
 
         // Convert the tree to NNF
@@ -13,7 +20,13 @@ impl BooleanOperations {
         self.to_rpn(&nnf_tree)
     }
 
-    pub(in crate::boolean_operations) fn to_nnf(&self, node: ExprNode) -> ExprNode {
+    pub(in crate::boolean_operations) fn to_nnf(
+        &self,
+        node: ExprNode<T>,
+    ) -> ExprNode<T>
+    where
+        T: From<LogicValue> + std::fmt::Display + Clone,
+    {
         match node {
             // Handle double negation
             ExprNode::UnaryOp('!', child) => match *child {
@@ -84,14 +97,21 @@ impl BooleanOperations {
 }
 
 pub fn run_negation_normal_form() {
-    let boolean_evaluation = BooleanOperations::new();
+    let boolean_evaluation: ExpressionEvaluator<bool, BooleanOperations> =
+        ExpressionEvaluator::<bool, BooleanOperations>::new();
     println!("\n\tRunning negation normal form function\n");
     let formula = "AB&!";
     println!("Original formula: {}", formula);
     let nnf = boolean_evaluation.negation_normal_form(formula);
     println!("Negation Normal Form: {}", nnf);
-    println!("Formula {}", boolean_evaluation.print_formula(&boolean_evaluation.build_tree(&nnf, Some(true)).unwrap()));
-
+    println!(
+        "Formula {}",
+        boolean_evaluation.print_formula(
+            &boolean_evaluation
+                .build_tree(&nnf, check_only_vars(&nnf))
+                .unwrap()
+        )
+    );
 }
 
 #[cfg(test)]
@@ -101,7 +121,8 @@ mod tests {
     use super::*;
     #[test]
     fn test_transformation() {
-        let boolean_evaluation = BooleanOperations::new();
+        let boolean_evaluation: ExpressionEvaluator<bool, BooleanOperations> =
+            ExpressionEvaluator::<bool, BooleanOperations>::new();
         assert_eq!(boolean_evaluation.negation_normal_form("AB&!"), "A!B!|");
         assert_eq!(boolean_evaluation.negation_normal_form("AB|!"), "A!B!&");
         assert_eq!(boolean_evaluation.negation_normal_form("AB>"), "A!B|");
@@ -126,10 +147,13 @@ mod tests {
     }
     #[test]
     fn test_truth_table() {
-        let mut evaluator = BooleanOperations::new();
+        let mut evaluator: ExpressionEvaluator<bool, BooleanOperations> =
+            ExpressionEvaluator::<bool, BooleanOperations>::new();
         let formula = "AB&!";
         let nnf = evaluator.negation_normal_form(formula);
-        assert_eq!(generate_truth_table(formula, &mut evaluator).unwrap(), generate_truth_table(&nnf, &mut evaluator).unwrap());
-
+        assert_eq!(
+            generate_truth_table(formula, &mut evaluator).unwrap(),
+            generate_truth_table(&nnf, &mut evaluator).unwrap()
+        );
     }
 }

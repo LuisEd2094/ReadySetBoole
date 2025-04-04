@@ -1,12 +1,15 @@
-use crate::boolean_operations::{BooleanOperations, ExprNode};
+use crate::aux::check_only_vars;
+use crate::aux::expresion_eval::{ExprNode, ExpressionEvaluator};
+use crate::boolean_operations::BooleanOperations;
 use crate::truth_table::generate_truth_table;
-impl BooleanOperations {
+
+impl ExpressionEvaluator<bool, BooleanOperations> {
     pub fn conjunctive_normal_form(&mut self, formula: &str, truth_table: Option<bool>) -> String {
         if truth_table.unwrap() == true {
             self.derive_cnf_from_truth_table(formula).unwrap()
         } else {
-            let tree = self
-                .build_tree(formula, Some(true))
+            let tree: ExprNode<bool> = self
+                .build_tree(formula, check_only_vars(formula))
                 .expect("Failed to build tree");
 
             // Convert the tree to NNF then distribute it to form cnf
@@ -64,7 +67,7 @@ impl BooleanOperations {
         Ok(cnf)
     }
 
-    fn to_cnf(&self, node: ExprNode) -> ExprNode {
+    fn to_cnf(&self, node: ExprNode<bool>) -> ExprNode<bool> {
         match node {
             // Base cases: constants, variables, and negations
             ExprNode::Const(_) | ExprNode::Var(_) | ExprNode::UnaryOp(_, _) => node,
@@ -90,7 +93,7 @@ impl BooleanOperations {
     }
 
     // Helper function to flatten conjunctions
-    fn flatten_conjunction(&self, left: ExprNode, right: ExprNode) -> ExprNode {
+    fn flatten_conjunction(&self, left: ExprNode<bool>, right: ExprNode<bool>) -> ExprNode<bool> {
         match (left, right) {
             // If both sides are conjunctions, merge them
             (
@@ -114,7 +117,7 @@ impl BooleanOperations {
     }
 
     // Helper function to flatten disjunctions
-    fn flatten_disjunction(&self, left: ExprNode, right: ExprNode) -> ExprNode {
+    fn flatten_disjunction(&self, left: ExprNode<bool>, right: ExprNode<bool>) -> ExprNode<bool> {
         match (left, right) {
             // If both sides are disjunctions, merge them
             (
@@ -139,7 +142,8 @@ impl BooleanOperations {
 }
 
 pub fn run_conjunctive_normal_form() {
-    let mut boolean_evaluation = BooleanOperations::new();
+    let mut boolean_evaluation: ExpressionEvaluator<bool, BooleanOperations> =
+        ExpressionEvaluator::<bool, BooleanOperations>::new();
     println!("\n\tRunning conjunctive_normal_form function\n");
     let formula = "ABCD&|&";
     println!("Original formula: {}", formula);
@@ -147,7 +151,11 @@ pub fn run_conjunctive_normal_form() {
     println!("Conjunctive Normal Form {}", cnf);
     println!(
         "Formula {}",
-        boolean_evaluation.print_formula(&boolean_evaluation.build_tree(&cnf, Some(true)).unwrap())
+        boolean_evaluation.print_formula(
+            &boolean_evaluation
+                .build_tree(&cnf, check_only_vars(&cnf))
+                .unwrap()
+        )
     );
 }
 
@@ -157,7 +165,8 @@ mod tests {
     #[test]
 
     fn test_not_truth() {
-        let mut boolean_evaluation = BooleanOperations::new();
+        let mut boolean_evaluation: ExpressionEvaluator<bool, BooleanOperations> =
+            ExpressionEvaluator::<bool, BooleanOperations>::new();
 
         /*
         I'm implementing it using the truth table method
@@ -237,7 +246,8 @@ mod tests {
     }
     #[test]
     fn test_second_method_with_truth_table() {
-        let mut boolean_evaluation: BooleanOperations = BooleanOperations::new();
+        let mut boolean_evaluation: ExpressionEvaluator<bool, BooleanOperations> =
+            ExpressionEvaluator::<bool, BooleanOperations>::new();
 
         /*
             I'm implementing it using the truth table method
@@ -292,9 +302,13 @@ mod tests {
     }
     #[test]
     fn test_result_truth_table() {
-        let mut evaluator = BooleanOperations::new();
+        let mut evaluator: ExpressionEvaluator<bool, BooleanOperations> =
+            ExpressionEvaluator::<bool, BooleanOperations>::new();
         let formula = "AB|!C!&";
         let cnf = evaluator.conjunctive_normal_form(formula, Some(true));
-        assert_eq!(generate_truth_table(formula, &mut evaluator).unwrap(), generate_truth_table(&cnf, &mut evaluator).unwrap());
+        assert_eq!(
+            generate_truth_table(formula, &mut evaluator).unwrap(),
+            generate_truth_table(&cnf, &mut evaluator).unwrap()
+        );
     }
 }

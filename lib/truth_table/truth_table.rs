@@ -1,3 +1,4 @@
+use crate::aux::expresion_eval::ExpressionEvaluator;
 use crate::boolean_operations::BooleanOperations;
 use std::collections::HashSet;
 
@@ -27,7 +28,7 @@ pub fn print_truth_table(table: &TruthTable) {
 
 pub fn generate_truth_table(
     formula: &str,
-    evaluator: &mut BooleanOperations,
+    evaluator: &mut ExpressionEvaluator<bool, BooleanOperations>,
 ) -> Result<TruthTable, String> {
     let mut variables: Vec<char> = formula
         .chars()
@@ -85,7 +86,8 @@ pub fn generate_truth_table(
 pub fn run_truth_table() {
     println!("\n\tRunning truth table function\n");
 
-    let mut boolean_operations: BooleanOperations = BooleanOperations::new();
+    let mut boolean_operations: ExpressionEvaluator<bool, BooleanOperations> =
+        ExpressionEvaluator::<bool, BooleanOperations>::new();
 
     let expression = "AB&C|";
     //let expression = "AB&CD&EF&GH&IJ&KL&MN&OP&QR&ST&UV&&&&&&&&&&&";
@@ -101,11 +103,12 @@ mod tests {
 
     #[test]
     fn test_simple_and() {
-        let mut evaluator = BooleanOperations::new();
-        let formula = "AB&";
-        let truth_table = generate_truth_table(formula, &mut evaluator).unwrap();
+        let mut evaluator: ExpressionEvaluator<bool, BooleanOperations> =
+            ExpressionEvaluator::<bool, BooleanOperations>::new();
+        let formula: &str = "AB&";
+        let truth_table: TruthTable = generate_truth_table(formula, &mut evaluator).unwrap();
 
-        let expected = vec![
+        let expected: Vec<(Vec<bool>, bool)> = vec![
             (vec![false, false], false),
             (vec![false, true], false),
             (vec![true, false], false),
@@ -117,11 +120,12 @@ mod tests {
 
     #[test]
     fn test_simple_or() {
-        let mut evaluator = BooleanOperations::new();
-        let formula = "AB|"; // A ∨ B
-        let truth_table = generate_truth_table(formula, &mut evaluator).unwrap();
+        let mut evaluator: ExpressionEvaluator<bool, BooleanOperations> =
+            ExpressionEvaluator::<bool, BooleanOperations>::new();
+        let formula: &str = "AB|"; // A ∨ B
+        let truth_table: TruthTable = generate_truth_table(formula, &mut evaluator).unwrap();
 
-        let expected = vec![
+        let expected: Vec<(Vec<bool>, bool)> = vec![
             (vec![false, false], false),
             (vec![false, true], true),
             (vec![true, false], true),
@@ -133,20 +137,22 @@ mod tests {
 
     #[test]
     fn test_negation() {
-        let mut evaluator = BooleanOperations::new();
-        let formula = "A!";
-        let truth_table = generate_truth_table(formula, &mut evaluator).unwrap();
+        let mut evaluator: ExpressionEvaluator<bool, BooleanOperations> =
+            ExpressionEvaluator::<bool, BooleanOperations>::new();
+        let formula: &str = "A!";
+        let truth_table: TruthTable = generate_truth_table(formula, &mut evaluator).unwrap();
 
-        let expected = vec![(vec![false], true), (vec![true], false)];
+        let expected: Vec<(Vec<bool>, bool)> = vec![(vec![false], true), (vec![true], false)];
 
         assert_eq!(truth_table.rows, expected);
     }
 
     #[test]
     fn test_complex_expression() {
-        let mut evaluator = BooleanOperations::new();
-        let formula = "AB&C|";
-        let truth_table = generate_truth_table(formula, &mut evaluator).unwrap();
+        let mut evaluator: ExpressionEvaluator<bool, BooleanOperations> =
+            ExpressionEvaluator::<bool, BooleanOperations>::new();
+        let formula: &str = "AB&C|";
+        let truth_table: TruthTable = generate_truth_table(formula, &mut evaluator).unwrap();
 
         let expected = vec![
             (vec![false, false, false], false),
@@ -164,10 +170,11 @@ mod tests {
 
     #[test]
     fn test_invalid_formula() {
-        let mut evaluator = BooleanOperations::new();
-        let formula = "AB!!";
+        let mut evaluator: ExpressionEvaluator<bool, BooleanOperations> =
+            ExpressionEvaluator::<bool, BooleanOperations>::new();
+        let formula: &str = "AB!!";
 
-        let result = generate_truth_table(formula, &mut evaluator);
+        let result: Result<TruthTable, String> = generate_truth_table(formula, &mut evaluator);
         assert!(result.is_err());
     }
 }
