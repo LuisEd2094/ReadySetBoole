@@ -39,30 +39,14 @@ pub enum ExprNode<T> {
 
 impl<T, O: Algebra<T>> ExpressionEvaluator<T, O> {
     pub fn new() -> Self {
-        let mut operations: HashMap<char, fn(T, T) -> T> =
-            HashMap::new();
+        let mut operations: HashMap<char, fn(T, T) -> T> = HashMap::new();
         let mut unary_operations: HashMap<char, fn(T) -> T> = HashMap::new();
 
-        operations.insert(
-            '>',
-            O::implication as fn(T, T) -> T,
-        );
-        operations.insert(
-            '|',
-            O::disjunction as fn(T, T) -> T,
-        );
-        operations.insert(
-            '&',
-            O::conjunction as fn(T, T) -> T,
-        );
-        operations.insert(
-            '^',
-            O::exclusive_disjunction as fn(T, T) -> T,
-        );
-        operations.insert(
-            '=',
-            O::logical_equivalence as fn(T, T) -> T,
-        );
+        operations.insert('>', O::implication as fn(T, T) -> T);
+        operations.insert('|', O::disjunction as fn(T, T) -> T);
+        operations.insert('&', O::conjunction as fn(T, T) -> T);
+        operations.insert('^', O::exclusive_disjunction as fn(T, T) -> T);
+        operations.insert('=', O::logical_equivalence as fn(T, T) -> T);
 
         unary_operations.insert('!', O::negation as fn(T) -> T);
 
@@ -74,14 +58,47 @@ impl<T, O: Algebra<T>> ExpressionEvaluator<T, O> {
         }
     }
 
-    pub fn build_tree(&self, expression: &str, var: bool) -> Result<ExprNode<T>, String>
+    fn validate_hash(
+        &self,
+        expression: &str,
+        hash: Option<&HashMap<String, T>>,
+    ) -> Result<bool, String> {
+        match hash {
+            Some(h) => {
+                for key in h.keys() {
+                    if !expression.contains(key) {
+                        return Err(format!("Variable '{}' not found", key));
+                    }
+                }
+                Ok(true)
+            }
+            None => Ok(false),
+        }
+    }
+
+    pub fn build_tree(
+        &self,
+        expression: &str,
+        var: bool,
+        hash: Option<&HashMap<String, T>>,
+    ) -> Result<ExprNode<T>, String>
     where
-        T: From<LogicValue>,
-    {
+        T: From<LogicValue> + Clone +,
+    {   
+        let use_hash = self.validate_hash(expression, hash)?;
         let mut stack: Vec<ExprNode<T>> = Vec::new();
         for c in expression.chars() {
             if var && c.is_ascii_uppercase() {
                 stack.push(ExprNode::Var(c));
+                if use_hash {
+                    if let Some(hash) = hash {
+                        if let Some(value) = hash.get(&c.to_string()) {
+                            stack.push(ExprNode::Const(value.clone()));
+                        } else {
+                            return Err(format!("Variable '{}' not found in hash", c));
+                        }
+                    }
+                }
             } else if !var && (c == '0' || c == '1') {
                 stack.push(ExprNode::Const(
                     LogicValue {
@@ -111,7 +128,6 @@ impl<T, O: Algebra<T>> ExpressionEvaluator<T, O> {
                 return Err(format!("Error: Invalid character '{}'", c));
             }
         }
-
         if stack.len() == 1 {
             Ok(stack.pop().unwrap())
         } else {
@@ -167,7 +183,7 @@ impl<T, O: Algebra<T>> ExpressionEvaluator<T, O> {
         T: std::fmt::Display + Clone + From<LogicValue>,
     {
         let binary_re = Regex::new(r"^[A-Z!&|ˆ>=]+$").unwrap().is_match(expression);
-        let tree = self.build_tree(expression, binary_re)?;
+        let tree = self.build_tree(expression, binary_re, None)?;
         Ok(self.evaluate_tree(&tree))
     }
 

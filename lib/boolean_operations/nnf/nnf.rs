@@ -10,7 +10,7 @@ where
 {
     pub fn negation_normal_form(&self, formula: &str) -> String {
         let tree = self
-            .build_tree(formula, check_only_vars(formula))
+            .build_tree(formula, check_only_vars(formula), None)
             .expect("Failed to build tree");
 
         // Convert the tree to NNF
@@ -108,7 +108,7 @@ pub fn run_negation_normal_form() {
         "Formula {}",
         boolean_evaluation.print_formula(
             &boolean_evaluation
-                .build_tree(&nnf, check_only_vars(&nnf))
+                .build_tree(&nnf, check_only_vars(&nnf), None)
                 .unwrap()
         )
     );

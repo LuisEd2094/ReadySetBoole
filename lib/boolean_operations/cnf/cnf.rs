@@ -9,7 +9,7 @@ impl ExpressionEvaluator<bool, BooleanOperations> {
             self.derive_cnf_from_truth_table(formula).unwrap()
         } else {
             let tree: ExprNode<bool> = self
-                .build_tree(formula, check_only_vars(formula))
+                .build_tree(formula, check_only_vars(formula), None)
                 .expect("Failed to build tree");
 
             // Convert the tree to NNF then distribute it to form cnf
@@ -153,7 +153,7 @@ pub fn run_conjunctive_normal_form() {
         "Formula {}",
         boolean_evaluation.print_formula(
             &boolean_evaluation
-                .build_tree(&cnf, check_only_vars(&cnf))
+                .build_tree(&cnf, check_only_vars(&cnf), None)
                 .unwrap()
         )
     );
