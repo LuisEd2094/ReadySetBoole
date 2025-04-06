@@ -37,7 +37,11 @@ pub enum ExprNode<T> {
     BinaryOp(char, Box<ExprNode<T>>, Box<ExprNode<T>>),
 }
 
-impl<T, O: Algebra<T>> ExpressionEvaluator<T, O> {
+impl<T, O> ExpressionEvaluator<T, O>
+where
+    T: From<LogicValue> + Clone + std::fmt::Display + std::fmt::Debug, // T must be Debug
+    O: Algebra<T>,
+{
     pub fn new() -> Self {
         let mut operations: HashMap<char, fn(T, T) -> T> = HashMap::new();
         let mut unary_operations: HashMap<char, fn(T) -> T> = HashMap::new();
@@ -81,23 +85,20 @@ impl<T, O: Algebra<T>> ExpressionEvaluator<T, O> {
         expression: &str,
         var: bool,
         hash: Option<&HashMap<String, T>>,
-    ) -> Result<ExprNode<T>, String>
-    where
-        T: From<LogicValue> + Clone +,
-    {   
+    ) -> Result<ExprNode<T>, String> {
         let use_hash = self.validate_hash(expression, hash)?;
         let mut stack: Vec<ExprNode<T>> = Vec::new();
         for c in expression.chars() {
-            if var && c.is_ascii_uppercase() {
-                stack.push(ExprNode::Var(c));
+            if c.is_ascii_uppercase() {
                 if use_hash {
                     if let Some(hash) = hash {
                         if let Some(value) = hash.get(&c.to_string()) {
+                            println!("Found value for {}: {:?}", c, value);
                             stack.push(ExprNode::Const(value.clone()));
-                        } else {
-                            return Err(format!("Variable '{}' not found in hash", c));
                         }
                     }
+                } else if var {
+                    stack.push(ExprNode::Var(c));
                 }
             } else if !var && (c == '0' || c == '1') {
                 stack.push(ExprNode::Const(
@@ -135,10 +136,7 @@ impl<T, O: Algebra<T>> ExpressionEvaluator<T, O> {
         }
     }
 
-    fn evaluate_tree(&mut self, node: &ExprNode<T>) -> T
-    where
-        T: Clone + std::fmt::Display,
-    {
+    fn evaluate_tree(&mut self, node: &ExprNode<T>) -> T {
         let key = self.generate_cache_key(node);
 
         // If result is cached, return it
@@ -161,10 +159,7 @@ impl<T, O: Algebra<T>> ExpressionEvaluator<T, O> {
         result
     }
 
-    fn generate_cache_key(&self, node: &ExprNode<T>) -> String
-    where
-        T: std::fmt::Display,
-    {
+    fn generate_cache_key(&self, node: &ExprNode<T>) -> String {
         match node {
             ExprNode::Const(value) => value.to_string(),
             ExprNode::Var(value) => panic!("Can't solve tree with value {}", value),
@@ -178,19 +173,13 @@ impl<T, O: Algebra<T>> ExpressionEvaluator<T, O> {
         }
     }
 
-    pub fn evaluate(&mut self, expression: &str) -> Result<T, String>
-    where
-        T: std::fmt::Display + Clone + From<LogicValue>,
-    {
+    pub fn evaluate(&mut self, expression: &str, hash: Option<&HashMap<String, T>>) -> Result<T, String> {
         let binary_re = Regex::new(r"^[A-Z!&|ˆ>=]+$").unwrap().is_match(expression);
-        let tree = self.build_tree(expression, binary_re, None)?;
+        let tree = self.build_tree(expression, binary_re, hash)?;
         Ok(self.evaluate_tree(&tree))
     }
 
-    pub fn to_rpn(&self, node: &ExprNode<T>) -> String
-    where
-        T: std::fmt::Display + Clone + From<LogicValue>,
-    {
+    pub fn to_rpn(&self, node: &ExprNode<T>) -> String {
         match node {
             ExprNode::Const(value) => value.to_string(),
             ExprNode::Var(c) => c.to_string(),
@@ -206,17 +195,11 @@ impl<T, O: Algebra<T>> ExpressionEvaluator<T, O> {
         }
     }
 
-    pub fn print_formula(&self, node: &ExprNode<T>) -> String
-    where
-        T: std::fmt::Display,
-    {
+    pub fn print_formula(&self, node: &ExprNode<T>) -> String {
         self.print_formula_recursive(node, 0)
     }
 
-    fn print_formula_recursive(&self, node: &ExprNode<T>, precedence: u8) -> String
-    where
-        T: std::fmt::Display,
-    {
+    fn print_formula_recursive(&self, node: &ExprNode<T>, precedence: u8) -> String {
         match node {
             ExprNode::Const(value) => value.to_string(),
             ExprNode::Var(c) => c.to_string(),

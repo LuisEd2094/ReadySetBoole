@@ -6,7 +6,7 @@ use crate::boolean_operations::BooleanOperations;
 
 impl<T, O: Algebra<T>> ExpressionEvaluator<T, O>
 where
-    T: From<LogicValue> + std::fmt::Display + Clone,
+    T: From<LogicValue> + std::fmt::Display + Clone + std::fmt::Debug,
 {
     pub fn negation_normal_form(&self, formula: &str) -> String {
         let tree = self

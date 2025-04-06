@@ -75,7 +75,7 @@ pub fn run_boolean_operations() {
     ];
 
     for expr in expressions {
-        match boolean_ops.evaluate(expr) {
+        match boolean_ops.evaluate(expr, None) {
             Ok(result) => println!("Expression '{}': {}", expr, result),
             Err(e) => println!("Expression '{}': {}", expr, e),
         }
@@ -136,21 +136,62 @@ mod tests {
     fn test_evaluate() {
         let mut boolean_operations: ExpressionEvaluator<bool, BooleanOperations> =
             ExpressionEvaluator::<bool, BooleanOperations>::new();
-        assert_eq!(boolean_operations.evaluate("10|").unwrap(), true);
-        assert_eq!(boolean_operations.evaluate("10&").unwrap(), false);
-        assert_eq!(boolean_operations.evaluate("10>").unwrap(), false);
-        assert_eq!(boolean_operations.evaluate("1!").unwrap(), false);
-        assert_eq!(boolean_operations.evaluate("11=").unwrap(), true);
-        assert_eq!(boolean_operations.evaluate("01^").unwrap(), true);
+        assert_eq!(boolean_operations.evaluate("10|", None).unwrap(), true);
+        assert_eq!(boolean_operations.evaluate("10&", None).unwrap(), false);
+        assert_eq!(boolean_operations.evaluate("10>", None).unwrap(), false);
+        assert_eq!(boolean_operations.evaluate("1!", None).unwrap(), false);
+        assert_eq!(boolean_operations.evaluate("11=", None).unwrap(), true);
+        assert_eq!(boolean_operations.evaluate("01^", None).unwrap(), true);
         assert_eq!(
             boolean_operations
-                .evaluate("10&!10&!10&!10&!10&!====")
+                .evaluate("10&!10&!10&!10&!10&!====", None)
                 .unwrap(),
             true
         );
-        assert!(boolean_operations.evaluate("1&").is_err());
-        assert!(boolean_operations.evaluate("!").is_err());
-        assert!(boolean_operations.evaluate("1@").is_err());
-        assert!(boolean_operations.evaluate("").is_err());
+        assert!(boolean_operations.evaluate("1&", None).is_err());
+        assert!(boolean_operations.evaluate("!", None).is_err());
+        assert!(boolean_operations.evaluate("1@", None).is_err());
+        assert!(boolean_operations.evaluate("", None).is_err());
+    }
+    #[test]
+    fn evaluate_with_hash() {
+        use std::collections::HashMap;
+        
+        let mut boolean_operations: ExpressionEvaluator<bool, BooleanOperations> =
+            ExpressionEvaluator::<bool, BooleanOperations>::new();
+        let hash: Option<HashMap<String, bool>> = Some(HashMap::from([
+            ("A".to_string(), true),
+            ("B".to_string(), false),
+        ]));
+        assert_eq!(boolean_operations.evaluate("AB|", hash.as_ref()).unwrap(), true);
+
+        let hash: Option<HashMap<String, bool>> = Some(HashMap::from([
+            ("A".to_string(), true),
+            ("B".to_string(), false),
+        ]));
+        assert_eq!(boolean_operations.evaluate("AB&", hash.as_ref()).unwrap(), false);
+
+        let hash: Option<HashMap<String, bool>> = Some(HashMap::from([
+            ("A".to_string(), true),
+            ("B".to_string(), false),
+        ]));
+        assert_eq!(boolean_operations.evaluate("AB>", hash.as_ref()).unwrap(), false);
+
+        let hash: Option<HashMap<String, bool>> = Some(HashMap::from([
+            ("A".to_string(), true),
+        ]));
+        assert_eq!(boolean_operations.evaluate("A!", hash.as_ref()).unwrap(), false);
+
+
+        let hash: Option<HashMap<String, bool>> = Some(HashMap::from([
+            ("A".to_string(), true),
+        ]));
+        assert_eq!(boolean_operations.evaluate("AA=", hash.as_ref()).unwrap(), true);
+
+        let hash: Option<HashMap<String, bool>> = Some(HashMap::from([
+            ("A".to_string(), false),
+            ("B".to_string(), true),
+        ]));
+        assert_eq!(boolean_operations.evaluate("AB^", hash.as_ref()).unwrap(), true);
     }
 }

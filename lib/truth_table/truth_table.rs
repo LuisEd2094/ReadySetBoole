@@ -69,7 +69,7 @@ pub fn generate_truth_table(
         }
 
         // Evaluate the formula with current variable assignments
-        match evaluator.evaluate(&formula_instance) {
+        match evaluator.evaluate(&formula_instance, None) {
             Ok(result) => rows.push((assignment, result)),
             Err(err) => {
                 return Err(format!(
