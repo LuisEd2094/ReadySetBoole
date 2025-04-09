@@ -7,7 +7,7 @@ use ready_set_boole::boolean_operations::cnf::run_conjunctive_normal_form;
 use ready_set_boole::truth_table::run_truth_table;
 use ready_set_boole::boolean_operations::sat::run_sat_truth_table;
 use ready_set_boole::sets::powerset::run_powerset;
-
+use ready_set_boole::sets::eval_set::run_set_operations;
 // Runs simple tests for each exercise, you can run 'cargo test' for a few more tests
 fn main() {
     run_adder();
@@ -19,4 +19,5 @@ fn main() {
     run_conjunctive_normal_form();
     run_sat_truth_table();
     run_powerset();
+    run_set_operations();
 }

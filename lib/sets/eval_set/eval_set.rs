@@ -1,5 +1,7 @@
-use crate::aux::traits::Algebra;
+use std::collections::HashMap;
 
+use crate::aux::traits::Algebra;
+use crate::aux::expresion_eval::ExpressionEvaluator;
 pub struct SetOperations;
 
 impl SetOperations {
@@ -91,6 +93,37 @@ impl Algebra<Vec<i32>> for SetOperations {
         Self::conjunction(&a_imp_b, &b_imp_a, universal)
     }
 }
+
+
+pub fn run_set_operations() {
+    println!("\n\tRunning Set operations function\n");
+    let mut boolean_ops: ExpressionEvaluator<Vec<i32>, SetOperations> =
+        ExpressionEvaluator::<Vec<i32>, SetOperations>::new();
+
+    // Test expressions
+    let expressions = vec![
+        "AB&",
+        "AB|",
+        "AB^",
+        "AB>",
+        "A!B!|"
+
+    ];
+    let hash: Option<HashMap<String, Vec<i32>>> = Some(HashMap::from([
+        ("A".to_string(), vec![0, 1, 2]),
+        ("B".to_string(), vec![0, 3, 4]),
+    ]));
+
+
+    for expr in expressions {
+        match boolean_ops.evaluate(expr, hash.as_ref()) {
+            Ok(result) => println!("Expression '{}': {:?}", expr, result),
+            Err(e) => println!("Expression '{}': {}", expr, e),
+        }
+    }
+}
+
+
 
 #[cfg(test)]
 mod tests {
@@ -256,5 +289,40 @@ mod tests {
         assert_eq!(original_universal[1], vec![3, 4, 5]);
         assert_eq!(a, vec![1, 2]);
         assert_eq!(b, vec![3, 4]);
+    }
+
+    #[test]
+    fn test_evaluate(){
+        use std::collections::HashMap;
+        let expresion_eval = "AB&";
+        let mut set_operations: ExpressionEvaluator<Vec<i32>, SetOperations> =
+            ExpressionEvaluator::<Vec<i32>, SetOperations>::new();
+        let hash: Option<HashMap<String, Vec<i32>>> = Some(HashMap::from([
+            ("A".to_string(), vec![0, 1, 2]),
+            ("B".to_string(), vec![0, 3, 4]),
+        ]));
+        assert_eq!(set_operations.evaluate(expresion_eval, hash.as_ref()).unwrap(), [0]);
+
+
+        let expresion_eval = "AB|";
+        let mut set_operations: ExpressionEvaluator<Vec<i32>, SetOperations> =
+            ExpressionEvaluator::<Vec<i32>, SetOperations>::new();
+        let hash: Option<HashMap<String, Vec<i32>>> = Some(HashMap::from([
+            ("A".to_string(), vec![0, 1, 2]),
+            ("B".to_string(), vec![3, 4, 5]),
+        ]));
+        assert_eq!(set_operations.evaluate(expresion_eval, hash.as_ref()).unwrap(), [0, 1, 2, 3, 4, 5]);
+
+
+        let expresion_eval = "A!";
+        let mut set_operations: ExpressionEvaluator<Vec<i32>, SetOperations> =
+            ExpressionEvaluator::<Vec<i32>, SetOperations>::new();
+        let hash: Option<HashMap<String, Vec<i32>>> = Some(HashMap::from([
+            ("A".to_string(), vec![0, 1, 2]),
+        ]));
+        assert_eq!(set_operations.evaluate(expresion_eval, hash.as_ref()).unwrap(), []);
+
+
+
     }
 }
