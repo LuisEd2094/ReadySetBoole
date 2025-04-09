@@ -39,7 +39,7 @@ pub enum ExprNode<T> {
 
 impl<T, O> ExpressionEvaluator<T, O>
 where
-    T: From<LogicValue> + Clone + std::fmt::Display + std::fmt::Debug, // T must be Debug
+    T: From<LogicValue> + Clone + std::fmt::Debug, // T must be Debug
     O: Algebra<T>,
 {
     pub fn new() -> Self {
@@ -173,7 +173,7 @@ where
 
     fn generate_cache_key(&self, node: &ExprNode<T>) -> String {
         match node {
-            ExprNode::Const(value) => value.to_string(),
+            ExprNode::Const(value) => format!("{:?}", value),
             ExprNode::Var(value) => panic!("Can't solve tree with value {}", value),
             ExprNode::UnaryOp(op, expr) => format!("{}{}", op, self.generate_cache_key(expr)),
             ExprNode::BinaryOp(op, left, right) => format!(
@@ -200,7 +200,7 @@ where
 
     pub fn to_rpn(&self, node: &ExprNode<T>) -> String {
         match node {
-            ExprNode::Const(value) => value.to_string(),
+            ExprNode::Const(value) => format!("{:?}", value),
             ExprNode::Var(c) => c.to_string(),
             ExprNode::UnaryOp(op, child) => {
                 let child_rpn = self.to_rpn(child);
@@ -220,7 +220,7 @@ where
 
     fn print_formula_recursive(&self, node: &ExprNode<T>, precedence: u8) -> String {
         match node {
-            ExprNode::Const(value) => value.to_string(),
+            ExprNode::Const(value) => format!("{:?}", value),
             ExprNode::Var(c) => c.to_string(),
             ExprNode::UnaryOp(_op, child) => {
                 let child_formula = self.print_formula_recursive(child, 10);
