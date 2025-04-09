@@ -4,8 +4,8 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 
 pub struct ExpressionEvaluator<T, O: Algebra<T>> {
-    operations: HashMap<char, fn(T, T) -> T>,
-    unary_operations: HashMap<char, fn(T) -> T>,
+    operations: HashMap<char, fn(&T, &T, Option<&Vec<T>>) -> T>,
+    unary_operations: HashMap<char, fn(&T, Option<&Vec<T>>) -> T>,
     cache: HashMap<String, T>,
     _marker: std::marker::PhantomData<O>,
 }
@@ -43,16 +43,22 @@ where
     O: Algebra<T>,
 {
     pub fn new() -> Self {
-        let mut operations: HashMap<char, fn(T, T) -> T> = HashMap::new();
-        let mut unary_operations: HashMap<char, fn(T) -> T> = HashMap::new();
+        let mut operations: HashMap<char, fn(&T, &T, Option<&Vec<T>>) -> T> = HashMap::new();
+        let mut unary_operations: HashMap<char, fn(&T, Option<&Vec<T>>) -> T> = HashMap::new();
 
-        operations.insert('>', O::implication as fn(T, T) -> T);
-        operations.insert('|', O::disjunction as fn(T, T) -> T);
-        operations.insert('&', O::conjunction as fn(T, T) -> T);
-        operations.insert('^', O::exclusive_disjunction as fn(T, T) -> T);
-        operations.insert('=', O::logical_equivalence as fn(T, T) -> T);
+        operations.insert('>', O::implication as fn(&T, &T, Option<&Vec<T>>) -> T);
+        operations.insert('|', O::disjunction as fn(&T, &T, Option<&Vec<T>>) -> T);
+        operations.insert('&', O::conjunction as fn(&T, &T, Option<&Vec<T>>) -> T);
+        operations.insert(
+            '^',
+            O::exclusive_disjunction as fn(&T, &T, Option<&Vec<T>>) -> T,
+        );
+        operations.insert(
+            '=',
+            O::logical_equivalence as fn(&T, &T, Option<&Vec<T>>) -> T,
+        );
 
-        unary_operations.insert('!', O::negation as fn(T) -> T);
+        unary_operations.insert('!', O::negation as fn(&T, Option<&Vec<T>>) -> T);
 
         Self {
             operations,
@@ -99,6 +105,8 @@ where
                     }
                 } else if var {
                     stack.push(ExprNode::Var(c));
+                } else {
+                    return Err(format!("Error: Invalid character '{}'", c));
                 }
             } else if !var && (c == '0' || c == '1') {
                 stack.push(ExprNode::Const(
@@ -136,7 +144,7 @@ where
         }
     }
 
-    fn evaluate_tree(&mut self, node: &ExprNode<T>) -> T {
+    fn evaluate_tree(&mut self, node: &ExprNode<T>, universal: Option<&Vec<T>>) -> T {
         let key = self.generate_cache_key(node);
 
         // If result is cached, return it
@@ -148,11 +156,15 @@ where
             ExprNode::Var(value) => panic!("Can't solve tree with value {}", value),
             ExprNode::UnaryOp(op, expr) => {
                 let func = self.unary_operations.get(op).unwrap();
-                func(self.evaluate_tree(expr))
+                func(&self.evaluate_tree(expr, universal), universal)
             }
             ExprNode::BinaryOp(op, left, right) => {
                 let func = self.operations.get(op).unwrap();
-                func(self.evaluate_tree(left), self.evaluate_tree(right))
+                func(
+                    &self.evaluate_tree(left, universal),
+                    &self.evaluate_tree(right, universal),
+                    universal,
+                )
             }
         };
         self.cache.insert(key, result.clone());
@@ -173,10 +185,17 @@ where
         }
     }
 
-    pub fn evaluate(&mut self, expression: &str, hash: Option<&HashMap<String, T>>) -> Result<T, String> {
+    pub fn evaluate(
+        &mut self,
+        expression: &str,
+        variables_value: Option<&HashMap<String, T>>,
+    ) -> Result<T, String> {
         let binary_re = Regex::new(r"^[A-Z!&|ˆ>=]+$").unwrap().is_match(expression);
-        let tree = self.build_tree(expression, binary_re, hash)?;
-        Ok(self.evaluate_tree(&tree))
+        let tree = self.build_tree(expression, binary_re, variables_value)?;
+
+        let universal_values: Option<Vec<T>> =
+            variables_value.map(|map| map.values().cloned().collect());
+        Ok(self.evaluate_tree(&tree, universal_values.as_ref()))
     }
 
     pub fn to_rpn(&self, node: &ExprNode<T>) -> String {

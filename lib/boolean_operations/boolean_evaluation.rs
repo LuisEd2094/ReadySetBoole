@@ -21,19 +21,19 @@ impl Algebra<bool> for BooleanOperations {
        1	0	0
        1	1	1
     */
-    fn implication(a: bool, b: bool) -> bool {
-        Self::disjunction(!a, b)
+    fn implication(a: &bool, b: &bool, _universal: Option<&Vec<bool>>) -> bool {
+        Self::disjunction(&!a, b, _universal)
     }
-    fn disjunction(a: bool, b: bool) -> bool {
-        a || b
+    fn disjunction(a: &bool, b: &bool,_universal: Option<&Vec<bool>>) -> bool {
+        *a || *b
     }
 
-    fn negation(a: bool) -> bool {
+    fn negation(a: &bool,_universal: Option<&Vec<bool>>) -> bool {
         !a
     }
 
-    fn conjunction(a: bool, b: bool) -> bool {
-        a && b
+    fn conjunction(a: &bool, b: &bool,_universal: Option<&Vec<bool>>) -> bool {
+        *a && *b
     }
 
     /**
@@ -47,11 +47,11 @@ impl Algebra<bool> for BooleanOperations {
        1	1	0
     */
 
-    fn exclusive_disjunction(a: bool, b: bool) -> bool {
+    fn exclusive_disjunction(a: &bool, b: &bool,_universal: Option<&Vec<bool>>) -> bool {
         a ^ b
     }
 
-    fn logical_equivalence(a: bool, b: bool) -> bool {
+    fn logical_equivalence(a: &bool, b: &bool,_universal: Option<&Vec<bool>>) -> bool {
         a == b
     }
 }
@@ -87,50 +87,50 @@ mod tests {
     use super::*;
     #[test]
     fn test_implication() {
-        assert_eq!(BooleanOperations::implication(false, false), true);
-        assert_eq!(BooleanOperations::implication(false, true), true);
-        assert_eq!(BooleanOperations::implication(true, false), false);
-        assert_eq!(BooleanOperations::implication(true, true), true);
+        assert_eq!(BooleanOperations::implication(&false, &false, None), true);
+        assert_eq!(BooleanOperations::implication(&false, &true, None), true);
+        assert_eq!(BooleanOperations::implication(&true, &false, None), false);
+        assert_eq!(BooleanOperations::implication(&&true, &true, None), true);
     }
     #[test]
     fn test_disjunction() {
-        assert_eq!(BooleanOperations::disjunction(false, false), false);
-        assert_eq!(BooleanOperations::disjunction(false, true), true);
-        assert_eq!(BooleanOperations::disjunction(true, false), true);
-        assert_eq!(BooleanOperations::disjunction(true, true), true);
+        assert_eq!(BooleanOperations::disjunction(&false, &false, None), false);
+        assert_eq!(BooleanOperations::disjunction(&false, &true, None), true);
+        assert_eq!(BooleanOperations::disjunction(&true, &false, None), true);
+        assert_eq!(BooleanOperations::disjunction(&true, &true, None), true);
     }
 
     #[test]
     fn test_negation() {
-        assert_eq!(BooleanOperations::negation(false), true);
-        assert_eq!(BooleanOperations::negation(true), false);
+        assert_eq!(BooleanOperations::negation(&false, None), true);
+        assert_eq!(BooleanOperations::negation(&true, None), false);
     }
 
     #[test]
     fn test_conjunction() {
-        assert_eq!(BooleanOperations::conjunction(false, false), false);
-        assert_eq!(BooleanOperations::conjunction(false, true), false);
-        assert_eq!(BooleanOperations::conjunction(true, false), false);
-        assert_eq!(BooleanOperations::conjunction(true, true), true);
+        assert_eq!(BooleanOperations::conjunction(&false, &false, None), false);
+        assert_eq!(BooleanOperations::conjunction(&false, &true, None), false);
+        assert_eq!(BooleanOperations::conjunction(&true, &false, None), false);
+        assert_eq!(BooleanOperations::conjunction(&true, &true, None), true);
     }
 
     #[test]
     fn test_exclusive_disjunction() {
         assert_eq!(
-            BooleanOperations::exclusive_disjunction(false, false),
+            BooleanOperations::exclusive_disjunction(&false, &false, None),
             false
         );
-        assert_eq!(BooleanOperations::exclusive_disjunction(false, true), true);
-        assert_eq!(BooleanOperations::exclusive_disjunction(true, false), true);
-        assert_eq!(BooleanOperations::exclusive_disjunction(true, true), false);
+        assert_eq!(BooleanOperations::exclusive_disjunction(&false, &true, None), true);
+        assert_eq!(BooleanOperations::exclusive_disjunction(&true, &false, None), true);
+        assert_eq!(BooleanOperations::exclusive_disjunction(&true, &true, None), false);
     }
 
     #[test]
     fn test_logical_equivalence() {
-        assert_eq!(BooleanOperations::logical_equivalence(false, false), true);
-        assert_eq!(BooleanOperations::logical_equivalence(false, true), false);
-        assert_eq!(BooleanOperations::logical_equivalence(true, false), false);
-        assert_eq!(BooleanOperations::logical_equivalence(true, true), true);
+        assert_eq!(BooleanOperations::logical_equivalence(&false, &false, None), true);
+        assert_eq!(BooleanOperations::logical_equivalence(&false, &true, None), false);
+        assert_eq!(BooleanOperations::logical_equivalence(&true, &false, None), false);
+        assert_eq!(BooleanOperations::logical_equivalence(&true, &true, None), true);
     }
     #[test]
     fn test_evaluate() {
