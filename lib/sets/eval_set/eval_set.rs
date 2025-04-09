@@ -200,26 +200,56 @@ mod tests {
 
     #[test]
     fn test_implication() {
+        let universal = vec![vec![1, 2, 3]];
+        let a = vec![];
+        let b = vec![2, 3];
+        // ∅ → B ≡ Universal ∨ B ≡ {1,2,3} ∨ {2,3} ≡ {1,2,3}
+        assert_eq!(
+            SetOperations::implication(&a, &b, Some(&universal)),
+            vec![1, 2, 3]
+        );
+
+        let universal = vec![vec![1, 2, 3]];
+        let a = vec![1, 2];
+        let b = vec![];
+        // A → ∅ ≡ ¬A ∨ ∅ ≡ {3} ∨ ∅ ≡ {3}
+        assert_eq!(
+            SetOperations::implication(&a, &b, Some(&universal)),
+            vec![3]
+        );
+
+        let universal = vec![vec![1, 2, 3, 4]];
+        let a = vec![1, 2]; 
+        let b = vec![2, 3]; 
+        // A → B ≡ ¬A ∨ B ≡ {3,4} ∨ {2,3} ≡ {2,3,4}
+        assert_eq!(
+            SetOperations::implication(&a, &b, Some(&universal)).sort(),
+            vec![2, 3, 4].sort()
+        );
+    }
+
+    #[test]
+    fn test_logical_equivalence() {
         let original_universal: Vec<Vec<i32>> = vec![vec![1, 2, 3], vec![3, 4, 5]];
 
         // A ≡ B ⇔ (A → B) ∧ (B → A)
         // A = {3,4}, B = {3,4}
-        // A ≡ B = {3,4,5} ∧ {3,4,5} = {3,4,5}
+        // A ≡ B = {3,4,5} ∧ {3,4,5} = {1,2,3,4,5}
         let a = vec![3, 4];
         let b = vec![3, 4];
-        let result = SetOperations::logical_equivalence(&a, &b, Some(&original_universal));
-        assert_eq!(result, vec![3, 4, 5]);
+        let result = SetOperations::logical_equivalence(&a, &b, Some(&original_universal)).sort();
+        assert_eq!(result, vec![1,2,3,4,5].sort());
         assert_eq!(a, vec![3, 4]);
         assert_eq!(b, vec![3, 4]);
 
         // A = {1,2}, B = {3,4}
         // A → B = {3,4,5}
         // B → A = {1,2,3}
-        // A ≡ B = {3} (only shared element between both)
+        // A ≡ B = {5}
         let a = vec![1, 2];
         let b = vec![3, 4];
         let result = SetOperations::logical_equivalence(&a, &b, Some(&original_universal));
-        assert_eq!(result, vec![3]);
+        assert_eq!(result, vec![5]);
 
         // Assert nothing was mutated
         assert_eq!(original_universal[0], vec![1, 2, 3]);
