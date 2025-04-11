@@ -13,7 +13,7 @@ pub fn powerset(set: &Vec<i32>) -> Vec<Vec<i32>> {
 }
 
 pub fn run_powerset(){
-    println!("\t\nRunning powerset...\n");
+    println!("\n\tRunning powerset...\n");
     let set: Vec<i32> = vec![1, 2, 3];
     let result: Vec<Vec<i32>> = powerset(&set);
     println!("Powerset of {:?} is: {:?}", set, result);

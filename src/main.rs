@@ -8,6 +8,8 @@ use ready_set_boole::truth_table::run_truth_table;
 use ready_set_boole::boolean_operations::sat::run_sat_truth_table;
 use ready_set_boole::sets::powerset::run_powerset;
 use ready_set_boole::sets::eval_set::run_set_operations;
+use ready_set_boole::curve::map::run_map;
+use ready_set_boole::curve::unmap::run_reverse_map;
 // Runs simple tests for each exercise, you can run 'cargo test' for a few more tests
 fn main() {
     run_adder();
@@ -20,4 +22,6 @@ fn main() {
     run_sat_truth_table();
     run_powerset();
     run_set_operations();
+    run_map();
+    run_reverse_map();
 }
